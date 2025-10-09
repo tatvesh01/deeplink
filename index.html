@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open App</title>
+    <script>
+      // === CONFIGURATION ===
+      const androidPackage = "com.suuqa.app"; // 🔹 your Android app ID
+      const iosAppId = "6748374899"; // 🔹 your iOS App Store ID
+      const appScheme = "suuqa"; // 🔹 custom scheme (set in Flutter iOS + Android)
+	  const deepLinkPath = "BottomBarScreen";
+      // ======================
+
+     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const isAndroid = /android/i.test(userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+  const platform = navigator.platform.toLowerCase();
+  const isMac = platform.includes('mac');
+  const isWindows = platform.includes('win');
+
+  function openApp() {
+      if (isAndroid) {
+    // For Android: intent://HOST/PATH
+    window.location = `intent://open/${deepLinkPath}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
+  } else if (isIOS) {
+      const appLink = `${appScheme}://${deepLinkPath}`;
+  const storeLink = `https://apps.apple.com/app/id${iosAppId}`;
+
+  // Create an invisible iframe so Safari doesn't show popup
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = appLink;
+  document.body.appendChild(iframe);
+
+  // If app doesn't open within 1.5s → redirect to App Store
+  setTimeout(() => {
+    window.location.href = storeLink;
+  }, 1500);
+  } else if (isMac) {
+      // Mac desktop → open App Store link
+      window.location = `https://apps.apple.com/app/id${iosAppId}`;
+    } else if (isWindows) {
+      // Windows desktop → open Play Store link
+      window.location = `https://play.google.com/store/apps/details?id=${androidPackage}`;
+    } else {
+      // fallback for other devices
+      window.location = "http://suuqa.app/";
+    }
+  }
+
+  window.onload = openApp;
+    </script>
+  </head>
+  <body>
+    <h3>Please wait App will open...</h3>
+  </body>
+</html>
