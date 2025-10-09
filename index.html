@@ -24,12 +24,15 @@
     // For Android: intent://HOST/PATH
     window.location = `intent://open/${deepLinkPath}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
   } else if (isIOS) {
-    // For iOS: scheme://host/path
+      
+	  // For iOS: scheme://host/path
     //window.location = `${appScheme}://open/${deepLinkPath}`;
 	window.location = `${appScheme}://${deepLinkPath}`;
     setTimeout(() => {
       window.location = `https://apps.apple.com/app/id${iosAppId}`;
-    }, 1000);
+    }, 2500);
+	
+	
   } else if (isMac) {
       // Mac desktop → open App Store link
       window.location = `https://apps.apple.com/app/id${iosAppId}`;
