@@ -29,7 +29,7 @@
 	window.location = `${appScheme}://${deepLinkPath}`;
     setTimeout(() => {
       window.location = `https://apps.apple.com/app/id${iosAppId}`;
-    }, 2500);
+    }, 1000);
   } else if (isMac) {
       // Mac desktop → open App Store link
       window.location = `https://apps.apple.com/app/id${iosAppId}`;
