@@ -24,23 +24,43 @@
     // For Android: intent://HOST/PATH
     window.location = `intent://open/${deepLinkPath}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
   } else if (isIOS) {
-       const appLink = `${appScheme}://${deepLinkPath}`;
-  const storeLink = `https://apps.apple.com/app/id${iosAppId}`;
-
-  // Try to open app — wrapped in try/catch to delay the invalid URL
-  const start = Date.now();
-  try {
-    window.location = appLink;
-  } catch (e) {
-    // ignore
-  }
-
-  // Fallback to App Store after delay
-  setTimeout(() => {
-    if (Date.now() - start < 2000) {
-      window.location.href = storeLink;
-    }
-  }, 1500);
+     
+	 
+	 
+	 
+	   const appUrl = `${appScheme}://${deepLinkPath}`;
+        const storeUrl = `https://apps.apple.com/app/id${iosAppId}`;
+        
+        // Create hidden iframe to avoid Safari error
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = appUrl;
+        document.body.appendChild(iframe);
+        
+        // Track if page becomes hidden (app opened)
+        let appOpened = false;
+        const checkAppOpened = () => {
+          appOpened = true;
+        };
+        
+        document.addEventListener('visibilitychange', checkAppOpened);
+        window.addEventListener('pagehide', checkAppOpened);
+        window.addEventListener('blur', checkAppOpened);
+        
+        // After delay, redirect to App Store if app didn't open
+        setTimeout(() => {
+          document.removeEventListener('visibilitychange', checkAppOpened);
+          window.removeEventListener('pagehide', checkAppOpened);
+          window.removeEventListener('blur', checkAppOpened);
+          
+          if (!appOpened) {
+            window.location.href = storeUrl;
+          }
+        }, 2500);
+		
+		
+		
+		
   } else if (isMac) {
       // Mac desktop → open App Store link
       window.location = `https://apps.apple.com/app/id${iosAppId}`;
