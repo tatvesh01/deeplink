@@ -24,14 +24,22 @@
     // For Android: intent://HOST/PATH
     window.location = `intent://open/${deepLinkPath}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
   } else if (isIOS) {
-      window.location = `${appScheme}://${deepLinkPath}`;
-    setTimeout(() => {
-      window.location = `https://apps.apple.com/app/id${iosAppId}`;
-    }, 2500);
+       const appLink = `${appScheme}://${deepLinkPath}`;
+  const storeLink = `https://apps.apple.com/app/id${iosAppId}`;
 
-  // If app doesn't open within 1.5s → redirect to App Store
+  // Try to open app — wrapped in try/catch to delay the invalid URL
+  const start = Date.now();
+  try {
+    window.location = appLink;
+  } catch (e) {
+    // ignore
+  }
+
+  // Fallback to App Store after delay
   setTimeout(() => {
-    window.location.href = storeLink;
+    if (Date.now() - start < 2000) {
+      window.location.href = storeLink;
+    }
   }, 1500);
   } else if (isMac) {
       // Mac desktop → open App Store link
