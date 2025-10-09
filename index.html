@@ -37,34 +37,28 @@
         const storeUrl = `https://apps.apple.com/app/id${iosAppId}`;
         
         let appOpened = false;
+        let redirectTimer;
         
         const handleVisibilityChange = () => {
-          if (document.hidden) {
-            appOpened = true;
-          }
+          appOpened = true;
+          clearTimeout(redirectTimer);
         };
         
         document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('blur', handleVisibilityChange);
         window.addEventListener('pagehide', handleVisibilityChange);
+        window.addEventListener('blur', handleVisibilityChange);
         
-        // Use iframe to prevent Safari error
-        const iframe = document.createElement('iframe');
-        iframe.style.cssText = 'display:none;width:0;height:0;border:none;position:absolute;';
-        iframe.src = appUrl;
-        document.body.appendChild(iframe);
+        // Try opening app with window.location (works for opening app)
+        window.location = appUrl;
         
-        // Check after delay
-        setTimeout(() => {
+        // Set redirect timer
+        redirectTimer = setTimeout(() => {
           document.removeEventListener('visibilitychange', handleVisibilityChange);
-          window.removeEventListener('blur', handleVisibilityChange);
           window.removeEventListener('pagehide', handleVisibilityChange);
-          
-          if (iframe.parentNode) {
-            document.body.removeChild(iframe);
-          }
+          window.removeEventListener('blur', handleVisibilityChange);
           
           if (!appOpened) {
+            // App didn't open, redirect to store
             window.location.href = storeUrl;
           }
         }, 2500);
