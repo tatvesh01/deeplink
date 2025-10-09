@@ -1,83 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Opening App...</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: white;
-      color: #333;
-    }
-  </style>
-  <script>
-    // === CONFIGURATION ===
-    const androidPackage = "com.suuqa.app";
-    const iosAppId = "6748374899";
-    const appScheme = "suuqa";
-    const deepLinkPath = "BottomBarScreen";
-    // =====================
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open App</title>
+    <script>
+      const iosAppId = "6748374899"; // iOS App Store ID
+      const appScheme = "suuqa"; // Custom scheme
+      const deepLinkPath = "BottomBarScreen";
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+      
+      function openIOSApp() {
+        // Create an invisible iframe
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = `${appScheme}://${deepLinkPath}`;
+        document.body.appendChild(iframe);
 
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    const isAndroid = /android/i.test(userAgent);
-    const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-    const platform = navigator.platform.toLowerCase();
-    const isMac = platform.includes('mac');
-    const isWindows = platform.includes('win');
-
-    function openApp() {
-      if (isAndroid) {
-        window.location = `intent://open/${deepLinkPath}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
-      } 
-      else if (isIOS) {
-        const appUrl = `${appScheme}://${deepLinkPath}`;
-        const storeUrl = `https://apps.apple.com/app/id${iosAppId}`;
-        
-        let appOpened = false;
-        let redirectTimer;
-        
-        const handleVisibilityChange = () => {
-          appOpened = true;
-          clearTimeout(redirectTimer);
-        };
-        
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('pagehide', handleVisibilityChange);
-        window.addEventListener('blur', handleVisibilityChange);
-        
-        // Try opening app with window.location (works for opening app)
-        window.location = appUrl;
-        
-        // Set redirect timer
-        redirectTimer = setTimeout(() => {
-          document.removeEventListener('visibilitychange', handleVisibilityChange);
-          window.removeEventListener('pagehide', handleVisibilityChange);
-          window.removeEventListener('blur', handleVisibilityChange);
-          
-          if (!appOpened) {
-            // App didn't open, redirect to store
-            window.location.href = storeUrl;
-          }
-        }, 2500);
-      } 
-      else if (isMac) {
-        window.location = `https://apps.apple.com/app/id${iosAppId}`;
-      } 
-      else if (isWindows) {
-        window.location = `https://play.google.com/store/apps/details?id=${androidPackage}`;
-      } 
-      else {
-        window.location = "http://suuqa.app/";
+        // Redirect to App Store after a delay
+        setTimeout(function () {
+          window.location = `https://apps.apple.com/app/id${iosAppId}`;
+        }, 2000); // 2 seconds delay
       }
-    }
 
-    window.onload = openApp;
-  </script>
-</head>
-<body>
-  <h3>Opening app...</h3>
-</body>
+      window.onload = function () {
+        if (isIOS) {
+          openIOSApp();
+        } else {
+          // Handle other platforms as you did
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <h3>Please wait. App will open...</h3>
+  </body>
 </html>
