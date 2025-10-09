@@ -24,12 +24,43 @@
       border-radius: 20px;
       backdrop-filter: blur(10px);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
     }
     h3 {
-      margin: 0 0 20px 0;
+      margin: 0 0 15px 0;
       font-size: 24px;
     }
+    p {
+      margin: 0 0 25px 0;
+      opacity: 0.9;
+      font-size: 16px;
+    }
+    .btn {
+      padding: 15px 40px;
+      font-size: 18px;
+      background: white;
+      color: #667eea;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: inline-block;
+      text-decoration: none;
+      margin: 10px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      display: none;
+    }
     .loader {
+      display: none;
       margin: 20px auto;
       width: 50px;
       height: 50px;
@@ -40,23 +71,6 @@
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
-    }
-    .fallback-btn {
-      display: none;
-      margin-top: 20px;
-      padding: 15px 30px;
-      font-size: 16px;
-      background: white;
-      color: #667eea;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-    .fallback-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     }
   </style>
   <script>
@@ -74,65 +88,66 @@
     const isMac = platform.includes('mac');
     const isWindows = platform.includes('win');
 
-    function openApp() {
+    function tryOpenApp() {
+      const appUrl = `${appScheme}://${deepLinkPath}`;
+      const storeUrl = `https://apps.apple.com/app/id${iosAppId}`;
+      
+      // Show loading
+      document.getElementById('message').textContent = 'Opening app...';
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('openBtn').style.display = 'none';
+      
+      let appOpened = false;
+      const startTime = Date.now();
+      
+      // Detect if app opened
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+          appOpened = true;
+        }
+      };
+      
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('blur', handleVisibilityChange);
+      
+      // Try opening app using invisible iframe (prevents Safari error)
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'display:none;width:0;height:0;border:none;';
+      iframe.src = appUrl;
+      document.body.appendChild(iframe);
+      
+      // Check if app opened after delay
+      setTimeout(() => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('blur', handleVisibilityChange);
+        
+        if (iframe.parentNode) {
+          document.body.removeChild(iframe);
+        }
+        
+        if (appOpened) {
+          // App opened successfully
+          document.getElementById('message').textContent = 'App opened!';
+          document.getElementById('loader').style.display = 'none';
+        } else {
+          // App didn't open, show store option
+          document.getElementById('message').textContent = "App not installed?";
+          document.getElementById('loader').style.display = 'none';
+          document.getElementById('storeBtn').style.display = 'inline-block';
+          document.getElementById('storeBtn').onclick = () => {
+            window.location.href = storeUrl;
+          };
+        }
+      }, 2500);
+    }
+
+    function handleOpen() {
       if (isAndroid) {
-        // Android: Use intent URL with fallback
+        // Android: Use intent URL with built-in fallback
         window.location = `intent://open/${deepLinkPath}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
       } 
       else if (isIOS) {
-        // iOS: Best approach to avoid Safari error
-        const appUrl = `${appScheme}://${deepLinkPath}`;
-        const storeUrl = `https://apps.apple.com/app/id${iosAppId}`;
-        
-        let appOpened = false;
-        const startTime = Date.now();
-        
-        // Detect if user leaves page (app opened)
-        const handleVisibilityChange = () => {
-          if (document.hidden) {
-            appOpened = true;
-          }
-        };
-        
-        const handleBlur = () => {
-          appOpened = true;
-        };
-        
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('blur', handleBlur);
-        window.addEventListener('pagehide', handleBlur);
-        
-        // Create temporary link and click it (better than window.location for iOS)
-        const link = document.createElement('a');
-        link.href = appUrl;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        
-        // Cleanup and check
-        setTimeout(() => {
-          document.removeEventListener('visibilitychange', handleVisibilityChange);
-          window.removeEventListener('blur', handleBlur);
-          window.removeEventListener('pagehide', handleBlur);
-          document.body.removeChild(link);
-          
-          const timeElapsed = Date.now() - startTime;
-          
-          // If app didn't open and not much time passed, redirect to store
-          if (!appOpened && timeElapsed < 3000) {
-            window.location.href = storeUrl;
-          }
-        }, 2000);
-        
-        // Backup: show fallback button after 3 seconds
-        setTimeout(() => {
-          if (!appOpened) {
-            document.getElementById('message').textContent = 'App not opening?';
-            const btn = document.getElementById('fallbackBtn');
-            btn.style.display = 'inline-block';
-            btn.onclick = () => window.location.href = storeUrl;
-          }
-        }, 3000);
+        tryOpenApp();
       } 
       else if (isMac) {
         window.location = `https://apps.apple.com/app/id${iosAppId}`;
@@ -145,14 +160,22 @@
       }
     }
 
-    window.onload = openApp;
+    window.onload = () => {
+      // Auto-open for Android (works perfectly)
+      if (isAndroid) {
+        handleOpen();
+      }
+      // For iOS, show button to avoid Safari error
+    };
   </script>
 </head>
 <body>
   <div class="container">
-    <h3 id="message">Opening app...</h3>
-    <div class="loader"></div>
-    <button id="fallbackBtn" class="fallback-btn">Open in App Store</button>
+    <h3 id="message">Ready to open Suuqa?</h3>
+    <p>Click the button below to launch the app</p>
+    <button id="openBtn" class="btn" onclick="handleOpen()">Open App</button>
+    <button id="storeBtn" class="btn btn-secondary">Download from App Store</button>
+    <div id="loader" class="loader"></div>
   </div>
 </body>
 </html>
