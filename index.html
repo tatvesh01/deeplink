@@ -24,14 +24,10 @@
     // For Android: intent://HOST/PATH
     window.location = `intent://open/${deepLinkPath}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
   } else if (isIOS) {
-      const appLink = `${appScheme}://${deepLinkPath}`;
-  const storeLink = `https://apps.apple.com/app/id${iosAppId}`;
-
-  // Create an invisible iframe so Safari doesn't show popup
-  const iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.src = appLink;
-  document.body.appendChild(iframe);
+      window.location = `${appScheme}://${deepLinkPath}`;
+    setTimeout(() => {
+      window.location = `https://apps.apple.com/app/id${iosAppId}`;
+    }, 2500);
 
   // If app doesn't open within 1.5s → redirect to App Store
   setTimeout(() => {
