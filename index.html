@@ -9,13 +9,10 @@
       const androidPackage = "com.suuqa.app"; // 🔹 your Android app ID
       const iosAppId = "6748374899"; // 🔹 your iOS App Store ID
       const appScheme = "suuqa"; // 🔹 custom scheme (set in Flutter iOS + Android)
-	  const deepLinkPath = "BottomBarScreen";
-	  //const productId = "68b32996f00d3bca122ffa68";
-      
+	  const deepLinkPath = "BottomBarScreen"; 
 	  
 	  const params = new URLSearchParams(window.location.search);
       const productId = params.get("product_id");
-	  
 
      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
   const isAndroid = /android/i.test(userAgent);
@@ -54,6 +51,6 @@
     </script>
   </head>
   <body>
-    <h3>Please wait App will open...</h3>
+    <h3>Suuqa App will open…</h3>
   </body>
 </html>
