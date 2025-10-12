@@ -36,12 +36,18 @@
 	
   } else if (isIOS) {
       
-	  // For iOS: scheme://host/path
-    //window.location = `${appScheme}://open/${deepLinkPath}`;
-	window.location = `${appScheme}://${deepLinkPath}?product_id=${productId}`;
-    setTimeout(() => {
-      window.location = `https://apps.apple.com/app/id${iosAppId}`;
-    }, 1000);
+	const now = Date.now();
+          // Try to open app
+          window.location = `${appScheme}://${deepLinkPath}?product_id=${productId}`;
+          
+          // After 1.5s, check if the app opened
+          setTimeout(() => {
+            const hidden = document.hidden || document.webkitHidden;
+            if (!hidden) {
+              // App did NOT open (user stayed in Safari)
+              window.location = `https://apps.apple.com/app/id${iosAppId}`;
+            }
+          }, 1500);
 	
 	
   } else if (isMac) {
