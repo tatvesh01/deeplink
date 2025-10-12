@@ -32,7 +32,7 @@
 	
 	if (isMessenger || isInstagram) {
     // Use web fallback
-    window.location = `https://play.google.com/store/apps/details?id=${androidPackage}`;
+	 window.location = `https://play.google.com/store/apps/details?id=${androidPackage}`;
 	} else {
 	window.location = `intent://open/${deepLinkPath}?product_id=${productId}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
 	}
