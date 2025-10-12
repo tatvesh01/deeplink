@@ -20,11 +20,27 @@
   const platform = navigator.platform.toLowerCase();
   const isMac = platform.includes('mac');
   const isWindows = platform.includes('win');
+  
+  const isMessenger = /FBAN|FBAV/i.test(userAgent); // FB Messenger app
+  const isInstagram = /Instagram/i.test(userAgent);
 
   function openApp() {
       if (isAndroid) {
     // For Android: intent://HOST/PATH
-    window.location = `intent://open/${deepLinkPath}?product_id=${productId}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
+    //window.location = `intent://open/${deepLinkPath}?product_id=${productId}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
+	
+	
+	if (isMessenger || isInstagram) {
+    // Use web fallback
+    window.location = `https://suuqa.app/fallback?product_id=${productId}`;
+	} else {
+	window.location = `intent://open/${deepLinkPath}?product_id=${productId}#Intent;scheme=${appScheme};package=${androidPackage};S.browser_fallback_url=https://play.google.com/store/apps/details?id=${androidPackage};end`;
+	}
+		
+	
+	
+	
+	
   } else if (isIOS) {
       
 	  // For iOS: scheme://host/path
